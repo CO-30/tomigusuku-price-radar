@@ -1,0 +1,24 @@
+# ソース構造調査（手動実行）。robots許可済みサイトのチラシ導線を出力する。
+name: source-explore
+
+on:
+  workflow_dispatch:
+    inputs:
+      urls:
+        description: "調査するURL（空白区切り、省略時は既定セット）"
+        required: false
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  explore:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install requests pyyaml
+      - run: python tools/explore_sources.py ${{ inputs.urls }}
