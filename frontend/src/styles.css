@@ -1,0 +1,200 @@
+/* 特売レーダー — 値札の視覚言語。紙白・墨・値札赤。 */
+:root {
+  --paper: #faf9f5;
+  --ink: #211f1a;
+  --ink-2: #6b675e;
+  --line: #e3dfd5;
+  --tag-red: #c8102e;
+  --deal: #0e7c7b;
+  --warn: #b97700;
+  --chip: #f0ede4;
+  --radius: 10px;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; padding: 0; }
+body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: "Zen Kaku Gothic New", "Hiragino Kaku Gothic ProN", sans-serif;
+  font-size: 15px;
+  line-height: 1.55;
+  -webkit-font-smoothing: antialiased;
+}
+.num {
+  font-family: "Barlow Semi Condensed", "Zen Kaku Gothic New", sans-serif;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+.app { max-width: 720px; margin: 0 auto; padding-bottom: 72px; }
+
+/* ── ヘッダー ─────────────────────────── */
+.masthead {
+  padding: 18px 16px 10px;
+  border-bottom: 2px solid var(--ink);
+  display: flex; align-items: baseline; justify-content: space-between; gap: 8px;
+}
+.masthead h1 { margin: 0; font-size: 19px; font-weight: 700; letter-spacing: 0.02em; }
+.masthead h1 small { font-weight: 500; color: var(--ink-2); font-size: 12px; margin-left: 6px; }
+.masthead .date { color: var(--ink-2); font-size: 12.5px; text-align: right; }
+
+.statusline {
+  display: flex; gap: 14px; padding: 8px 16px; font-size: 12.5px;
+  color: var(--ink-2); border-bottom: 1px solid var(--line);
+  overflow-x: auto; white-space: nowrap;
+}
+.statusline b { color: var(--ink); font-weight: 700; }
+.statusline .deal-count b { color: var(--deal); }
+
+/* ── カテゴリチップ ───────────────────── */
+.chips {
+  display: flex; gap: 8px; padding: 12px 16px; overflow-x: auto;
+  scrollbar-width: none;
+}
+.chips::-webkit-scrollbar { display: none; }
+.chip {
+  border: 1px solid var(--line); background: var(--chip); color: var(--ink);
+  border-radius: 999px; padding: 5px 14px; font-size: 13px; white-space: nowrap;
+  cursor: pointer; font-family: inherit;
+}
+.chip.active { background: var(--ink); color: var(--paper); border-color: var(--ink); }
+
+.sortrow {
+  display: flex; align-items: center; gap: 8px; padding: 0 16px 10px;
+  font-size: 12.5px; color: var(--ink-2);
+}
+.sortrow select {
+  font-family: inherit; font-size: 13px; padding: 4px 8px;
+  border: 1px solid var(--line); border-radius: 6px; background: #fff; color: var(--ink);
+}
+
+/* ── ランキング行（値札リスト）──────────── */
+.rows { list-style: none; margin: 0; padding: 0; }
+.row {
+  display: grid; grid-template-columns: 34px 1fr auto; gap: 10px;
+  padding: 12px 16px; border-bottom: 1px solid var(--line);
+  align-items: center; cursor: pointer; background: transparent;
+  width: 100%; text-align: left; border-left: 3px solid transparent;
+  font-family: inherit;
+}
+.row:active { background: var(--chip); }
+.row.bargain { border-left-color: var(--deal); background: #0e7c7b0d; }
+.row .rank { color: var(--ink-2); font-size: 15px; text-align: center; }
+.row .rank.top { color: var(--tag-red); }
+.row .info { min-width: 0; }
+.row .name {
+  font-weight: 700; font-size: 15px; overflow: hidden;
+  text-overflow: ellipsis; white-space: nowrap;
+}
+.row .meta { font-size: 12px; color: var(--ink-2); display: flex; gap: 8px; flex-wrap: wrap; }
+.row .meta .deal-tag { color: var(--deal); font-weight: 700; }
+.row .price { text-align: right; }
+.row .unit { color: var(--tag-red); font-size: 22px; line-height: 1.1; }
+.row .unit small { font-size: 11px; color: var(--ink-2); font-weight: 500; margin-left: 2px; display: block; }
+.row .total { font-size: 12px; color: var(--ink-2); }
+
+.empty {
+  padding: 48px 24px; text-align: center; color: var(--ink-2); font-size: 14px;
+}
+.empty b { display: block; color: var(--ink); font-size: 16px; margin-bottom: 8px; }
+
+/* ── 詳細シート ───────────────────────── */
+.sheet-back {
+  position: fixed; inset: 0; background: #211f1a66; z-index: 20;
+  display: flex; align-items: flex-end; justify-content: center;
+}
+.sheet {
+  background: var(--paper); width: 100%; max-width: 720px;
+  border-radius: 16px 16px 0 0; padding: 20px 20px 28px;
+  max-height: 86vh; overflow-y: auto;
+}
+.sheet h2 { margin: 0 0 2px; font-size: 19px; }
+.sheet .sub { color: var(--ink-2); font-size: 13px; margin-bottom: 14px; }
+.pricebox {
+  display: flex; align-items: baseline; gap: 16px; padding: 14px 16px;
+  border: 1.5px solid var(--ink); border-radius: var(--radius); margin-bottom: 14px;
+}
+.pricebox .unit { color: var(--tag-red); font-size: 34px; }
+.pricebox .unit small { font-size: 13px; color: var(--ink-2); margin-left: 4px; }
+.pricebox .total { color: var(--ink-2); font-size: 14px; }
+.kv { display: grid; grid-template-columns: 7em 1fr; gap: 4px 12px; font-size: 13.5px; margin: 0 0 14px; }
+.kv dt { color: var(--ink-2); }
+.kv dd { margin: 0; }
+.sheet .actions { display: flex; gap: 10px; margin-top: 16px; flex-wrap: wrap; }
+.btn {
+  font-family: inherit; font-size: 14px; font-weight: 700;
+  border-radius: 8px; padding: 10px 16px; cursor: pointer;
+  border: 1.5px solid var(--ink); background: var(--paper); color: var(--ink);
+}
+.btn.primary { background: var(--ink); color: var(--paper); }
+.btn.on { background: var(--deal); border-color: var(--deal); color: #fff; }
+.flyer-link img {
+  width: 100%; border: 1px solid var(--line); border-radius: 8px; margin-top: 12px;
+}
+.sparkbox { margin: 8px 0 4px; }
+.sparkbox .caption { font-size: 12px; color: var(--ink-2); }
+
+/* ── 店舗状況 ─────────────────────────── */
+.stores { padding: 4px 16px 20px; }
+.stores h3 { font-size: 14px; margin: 18px 0 8px; }
+.store-item {
+  display: flex; justify-content: space-between; gap: 10px;
+  padding: 7px 0; border-bottom: 1px dashed var(--line); font-size: 13.5px;
+}
+.store-item .st { font-size: 12.5px; white-space: nowrap; }
+.st.manual, .st.ok { color: var(--deal); font-weight: 700; }
+.st.no_flyer { color: var(--ink-2); }
+.st.blocked, .st.unsupported { color: var(--warn); }
+.st.failed { color: var(--tag-red); }
+
+/* ── 買い物リスト / 設定 ─────────────────── */
+.page { padding: 16px; }
+.page h2 { font-size: 17px; margin: 4px 0 12px; }
+.list-item {
+  display: grid; grid-template-columns: 1fr auto auto; gap: 10px;
+  align-items: center; padding: 10px 0; border-bottom: 1px solid var(--line);
+}
+.list-item .best { font-size: 12.5px; color: var(--deal); font-weight: 700; }
+.list-item .nohit { font-size: 12.5px; color: var(--ink-2); }
+.iconbtn {
+  border: none; background: none; font-size: 17px; cursor: pointer;
+  color: var(--ink-2); padding: 4px;
+}
+.sumline {
+  display: flex; justify-content: space-between; padding: 14px 0;
+  font-weight: 700; font-size: 15px;
+}
+.addform { display: flex; gap: 8px; margin: 12px 0; }
+.addform input {
+  flex: 1; font-family: inherit; font-size: 14px; padding: 9px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff;
+}
+.note { font-size: 12.5px; color: var(--ink-2); }
+.alert-hit {
+  border-left: 3px solid var(--deal); background: #0e7c7b0d;
+  padding: 10px 12px; border-radius: 0 8px 8px 0; margin-bottom: 8px; font-size: 13.5px;
+}
+
+/* ── 下部ナビ ─────────────────────────── */
+.tabbar {
+  position: fixed; bottom: 0; left: 0; right: 0; z-index: 10;
+  background: var(--paper); border-top: 1px solid var(--line);
+  display: flex; justify-content: center;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+.tabbar .inner { display: flex; width: 100%; max-width: 720px; }
+.tab {
+  flex: 1; text-align: center; padding: 10px 0 8px; font-size: 11.5px;
+  color: var(--ink-2); background: none; border: none; cursor: pointer;
+  font-family: inherit;
+}
+.tab .ico { display: block; font-size: 18px; line-height: 1.2; }
+.tab.active { color: var(--ink); font-weight: 700; }
+
+.loading { padding: 60px 20px; text-align: center; color: var(--ink-2); }
+
+@media (prefers-reduced-motion: no-preference) {
+  .sheet { animation: rise 0.22s ease-out; }
+  @keyframes rise { from { transform: translateY(24px); opacity: 0.6; } }
+}
+:focus-visible { outline: 2px solid var(--deal); outline-offset: 2px; }
