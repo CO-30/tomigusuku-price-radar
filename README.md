@@ -3,7 +3,7 @@
 沖縄県豊見城市周辺のスーパーの特売チラシを毎朝自動処理し、容量・個数を解析して
 **実質単価（¥/100g・¥/100ml・¥/個 など）の安い順**に横断比較する個人向けWebアプリ。
 
-- 公開URL: https://tomishirokharea.github.io/price-radar/
+- 公開URL: https://co-30.github.io/tomigusuku-price-radar/
 - 完全無料運用（GitHub Actions + GitHub Pages + SQLite。外部契約・APIキーなし）
 - 毎朝 05:30 JST に収集・解析、06:30 に自動リトライ、7時までにランキング更新
 

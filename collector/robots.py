@@ -7,7 +7,7 @@ import urllib.robotparser
 from urllib.parse import urlsplit
 
 USER_AGENT = ("TomigusukuPriceRadar/1.0 "
-              "(+https://github.com/tomishirokharea/price-radar; personal use)")
+              "(+https://github.com/CO-30/tomigusuku-price-radar; personal use)")
 
 _cache: dict[str, urllib.robotparser.RobotFileParser] = {}
 
