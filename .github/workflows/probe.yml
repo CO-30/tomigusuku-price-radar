@@ -1,0 +1,26 @@
+# 各チェーンの公式チラシソースの取得可否（robots.txt・到達性）を再調査する。
+# 手動実行し、結果レポートを artifact として確認。許可ソースが見つかれば
+# stores.yaml の該当店舗を auto に昇格する。
+name: source-probe
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  probe:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - name: ソース到達性レポート
+        run: python -m collector.probe | tee probe_report.txt
+      - uses: actions/upload-artifact@v4
+        with:
+          name: probe-report
+          path: probe_report.txt
