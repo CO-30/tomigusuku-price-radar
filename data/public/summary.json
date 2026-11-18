@@ -1,0 +1,123 @@
+{
+ "date": "2026-11-19",
+ "updated_at": "2026-11-19 08:23",
+ "stores_total": 16,
+ "stores_ok": 0,
+ "products_total": 0,
+ "review_total": 0,
+ "bargains_total": 0,
+ "stores": [
+  {
+   "id": "bigexpress_tsukazan",
+   "name": "ザ・ビッグエクスプレス 津嘉山店",
+   "area": "南風原町",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "gyomu_haebaru",
+   "name": "業務スーパー 南風原店",
+   "area": "南風原町",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "kanehide_nishizaki",
+   "name": "タウンプラザかねひで 西崎店",
+   "area": "糸満市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "gyomu_itoman",
+   "name": "業務スーパー 糸満店",
+   "area": "糸満市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "acoop_tomieru",
+   "name": "Aコープ とみえ〜る店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "donki_tomigusuku",
+   "name": "MEGAドン・キホーテ 豊見城店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "aeonstyle_toyosaki",
+   "name": "イオンスタイル 豊崎",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "sanei_v21_gibo",
+   "name": "サンエー V21ぎぼ食品館",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "kanehide_tomigusuku_danchi",
+   "name": "タウンプラザかねひで 豊見城団地前店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "direx_tomigusuku",
+   "name": "ダイレックス 豊見城店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "union_tomigusuku",
+   "name": "フレッシュプラザユニオン 豊見城店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "maxvalu_toyomi",
+   "name": "マックスバリュ とよみ店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "maxvalu_dakejin",
+   "name": "マックスバリュ 武富店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "maxvalu_tomigusuku",
+   "name": "マックスバリュ 豊見城店",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "ryubo_toyosaki",
+   "name": "リウボウ 豊崎食品館",
+   "area": "豊見城市",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  },
+  {
+   "id": "bigexpress_oroku",
+   "name": "ザ・ビッグエクスプレス 小禄店",
+   "area": "那覇市小禄",
+   "status": "no_flyer",
+   "detail": "inboxに投入なし"
+  }
+ ]
+}
