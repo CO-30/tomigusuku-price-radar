@@ -29,7 +29,8 @@ jobs:
         id: guard
         run: |
           TODAY=$(TZ=Asia/Tokyo date +%F)
-          if [ -f data/last_success ] && [ "$(cat data/last_success)" = "$TODAY" ]; then
+          # 手動実行(workflow_dispatch)は常に実行。ガードはcronのリトライ枠のみ対象
+          if [ "${{ github.event_name }}" = "schedule" ] && [ -f data/last_success ] && [ "$(cat data/last_success)" = "$TODAY" ]; then
             echo "already succeeded today ($TODAY)"
             echo "ran=false" >> "$GITHUB_OUTPUT"
           else
