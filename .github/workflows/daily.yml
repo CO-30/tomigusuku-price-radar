@@ -71,7 +71,7 @@ jobs:
         run: |
           git config user.name "price-radar-bot"
           git config user.email "actions@users.noreply.github.com"
-          git pull --rebase origin main
+          git pull --rebase --autostash origin main
           git add data/
           git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Tokyo date '+%F %R') 自動更新"
           git push
