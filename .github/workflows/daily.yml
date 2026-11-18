@@ -102,6 +102,11 @@ jobs:
           npm ci
           npm run build
 
+      - uses: actions/configure-pages@v5
+        if: steps.guard.outputs.ran == 'true'
+        with:
+          enablement: true
+
       - uses: actions/upload-pages-artifact@v3
         if: steps.guard.outputs.ran == 'true'
         with:
