@@ -1,0 +1,31 @@
+# push時にテスト一式を実行。Actionsランナー上でOCR(日本語)を含む全パイプラインを検証する。
+name: ci
+
+on:
+  push:
+    branches: [main]
+    paths-ignore: ["data/**"]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - run: |
+          sudo apt-get update -q
+          sudo apt-get install -y -q tesseract-ocr tesseract-ocr-jpn poppler-utils fonts-noto-cjk
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+      - run: pip install -r requirements.txt
+      - run: python -m pytest tests/ -v
+      - name: フロントエンドビルド検証
+        run: |
+          cd frontend
+          npm ci
+          npm run build

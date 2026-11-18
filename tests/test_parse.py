@@ -51,3 +51,35 @@ def test_name_near_price_grouped():
     assert len(out) == 1
     assert "りんご" in out[0].name
     assert "遠く" not in out[0].name
+
+
+def test_split_dual_notation_prefers_tax_included_token():
+    # 「98円」と「(税込105.84円)」が別トークンに割れた場合も税込を採用する
+    words = [
+        Word("りんご", 100, 100, 120, 40, 92.0),
+        Word("98円", 100, 160, 90, 50, 95.0),
+        Word("(税込105.84円)", 100, 220, 180, 36, 93.0),
+    ]
+    out = extract_products(words)
+    assert len(out) == 1
+    assert out[0].price.amount_incl == 105.84
+    assert out[0].price.tax_status == "included"
+
+
+def test_huge_price_gets_low_confidence():
+    words = [
+        Word("高級肉", 10, 10, 100, 30, 90.0),
+        Word("999999円", 10, 50, 120, 40, 90.0),
+    ]
+    out = extract_products(words)
+    assert len(out) == 1
+    assert out[0].confidence <= 0.2
+
+
+def test_tiny_price_is_dropped():
+    # 10円未満の単独表記はOCRノイズとして拾わない（商品を作らない）
+    words = [
+        Word("ティッシュ", 10, 10, 100, 30, 90.0),
+        Word("3円", 10, 50, 60, 40, 90.0),
+    ]
+    assert extract_products(words) == []

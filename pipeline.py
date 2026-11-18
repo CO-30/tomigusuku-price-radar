@@ -5,6 +5,7 @@
 """
 from __future__ import annotations
 
+import hashlib
 import json
 import shutil
 from dataclasses import dataclass
@@ -14,13 +15,14 @@ from pathlib import Path
 from analyzer.classify import classify
 from analyzer.ocr import ocr_image, pdf_to_images
 from analyzer.parse import extract_products
-from analyzer.unitprice import unit_price
+from analyzer.unitprice import sanity_ok, unit_price
 from collector.run import collect_all, load_stores
 from storage import db as dbm
 
 JST = timezone(timedelta(hours=9))
 CONFIDENCE_THRESHOLD = 0.55
 BARGAIN_DISCOUNT = 0.10  # 30日平均より10%以上安ければお買い得候補
+FLYER_RETENTION_DAYS = 30  # 公開用チラシ画像の保持日数（リポジトリ肥大対策）
 
 
 @dataclass
@@ -73,6 +75,11 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
         items = []
         for f in res.files:
             src = Path(f["path"])
+            # 同一内容のファイルは一度だけ取込む（inbox 残置による再取込・
+            # 推定期間のズレ・チラシ画像の日次複製を防ぐ）
+            sha1 = hashlib.sha1(src.read_bytes()).hexdigest()
+            if dbm.was_ingested(conn, res.store_id, sha1):
+                continue
             # Pages から参照できる場所にコピー
             dest = flyer_pub / res.store_id / src.name
             dest.parent.mkdir(parents=True, exist_ok=True)
@@ -84,9 +91,12 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
                 dbm.log_fetch(conn, res.store_id, t, res.status,
                               f"{res.detail}; 解析失敗 {src.name}: {str(e)[:100]}")
                 continue
+            dbm.mark_ingested(conn, res.store_id, sha1, src.name,
+                              f["period_start"], f["period_end"], t)
             for rp in raws:
                 cat = classify(rp.name)
                 up = unit_price(rp.price, rp.qty, cat)
+                implausible = not sanity_ok(up, cat)
                 items.append({
                     "store_id": res.store_id, "name": rp.name,
                     "category": cat.id,
@@ -99,7 +109,8 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
                     "unit_price": up.value if up else None,
                     "unit_label": up.unit_label if up else None,
                     "confidence": rp.confidence,
-                    "needs_review": int(rp.confidence < CONFIDENCE_THRESHOLD),
+                    "needs_review": int(rp.confidence < CONFIDENCE_THRESHOLD
+                                        or implausible),
                     "date": t,
                     "period_start": f["period_start"],
                     "period_end": f["period_end"],
@@ -108,6 +119,14 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
                     "source_url": f.get("source_url"),
                 })
         n_products += dbm.upsert_products(conn, items)
+
+    # 2.5 古い公開チラシ画像の間引き
+    flyers_root = base / "data" / "flyers"
+    if flyers_root.is_dir():
+        cutoff = (today - timedelta(days=FLYER_RETENTION_DAYS)).isoformat()
+        for d in flyers_root.iterdir():
+            if d.is_dir() and d.name < cutoff:
+                shutil.rmtree(d, ignore_errors=True)
 
     # 3. エクスポート
     now = datetime.now(JST).strftime("%Y-%m-%d %H:%M")

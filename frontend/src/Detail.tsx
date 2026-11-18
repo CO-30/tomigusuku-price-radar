@@ -77,10 +77,15 @@ export function Detail({ p, history, fav, inList, onFav, onList, onClose }: Prop
             閉じる
           </button>
         </div>
-        {img && (
+        {img && !img.toLowerCase().endsWith(".pdf") && (
           <a className="flyer-link" href={img} target="_blank" rel="noreferrer">
             <img src={img} alt={`${p.store_name}のチラシ`} loading="lazy" />
           </a>
+        )}
+        {img && img.toLowerCase().endsWith(".pdf") && (
+          <p className="note">
+            <a href={img} target="_blank" rel="noreferrer">チラシPDFを開く</a>
+          </p>
         )}
         {p.source_url && (
           <p className="note">

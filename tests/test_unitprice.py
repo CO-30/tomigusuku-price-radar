@@ -43,3 +43,13 @@ def test_vegetables_by_weight_when_grams_known():
     up = unit_price(Price(100), Quantity(500, "g"), classify("もやし"))
     assert up.value == 20
     assert up.unit_label == "¥/100g"
+
+
+def test_sanity_cap_flags_implausible_unit_price():
+    from analyzer.unitprice import UnitPrice, sanity_ok
+    # 野菜 9800円/100g はOCR誤読として要確認扱い
+    assert sanity_ok(UnitPrice(9800, "¥/100g"), classify("キャベツ")) is False
+    assert sanity_ok(UnitPrice(49, "¥/100g"), classify("キャベツ")) is True
+    assert sanity_ok(UnitPrice(25, "¥/個"), classify("たまご10個")) is True
+    assert sanity_ok(UnitPrice(900, "¥/個"), classify("たまご10個")) is False
+    assert sanity_ok(None, classify("キャベツ")) is True

@@ -3,7 +3,7 @@ import { Home } from "./Home";
 import { ShopList } from "./ShopList";
 import { Settings, alertHits } from "./Settings";
 import { Detail } from "./Detail";
-import { loadHistory, loadRanking, loadSummary } from "./data";
+import { loadHistory, loadRanking, loadReview, loadSummary } from "./data";
 import { AlertRule, usePersistent } from "./store";
 import { HistoryEntry, Product, Ranking, Summary } from "./types";
 
@@ -13,6 +13,7 @@ export default function App() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [ranking, setRanking] = useState<Ranking | null>(null);
   const [history, setHistory] = useState<Record<string, HistoryEntry>>({});
+  const [review, setReview] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("home");
   const [selected, setSelected] = useState<Product | null>(null);
@@ -29,6 +30,7 @@ export default function App() {
         setHistory(h);
       })
       .catch((e) => setError(String(e)));
+    loadReview().then(setReview).catch(() => setReview([]));
   }, []);
 
   const nAlerts = useMemo(
@@ -64,7 +66,7 @@ export default function App() {
       </header>
 
       {tab === "home" && (
-        <Home summary={summary} ranking={ranking} onSelect={setSelected} />
+        <Home summary={summary} ranking={ranking} review={review} onSelect={setSelected} />
       )}
       {tab === "list" && (
         <ShopList ranking={ranking} list={list} setList={setList} onSelect={setSelected} />

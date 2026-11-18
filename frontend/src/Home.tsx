@@ -7,10 +7,11 @@ type SortKey = "unit" | "price" | "store" | "end";
 interface Props {
   summary: Summary;
   ranking: Ranking;
+  review: Product[];
   onSelect: (p: Product) => void;
 }
 
-export function Home({ summary, ranking, onSelect }: Props) {
+export function Home({ summary, ranking, review, onSelect }: Props) {
   const [cat, setCat] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("unit");
 
@@ -110,6 +111,23 @@ export function Home({ summary, ranking, onSelect }: Props) {
             </li>
           ))}
         </ol>
+      )}
+
+      {review.length > 0 && (
+        <section className="stores">
+          <h3>要確認（読取信頼度が低い・価格が不自然な {review.length} 件）</h3>
+          {review.map((p, i) => (
+            <div className="store-item" key={i}>
+              <span>
+                {p.name} <span className="note">{p.store_name}</span>
+              </span>
+              <span className="num">{p.price_incl}円</span>
+            </div>
+          ))}
+          <p className="note">
+            ランキングには含めていません。チラシ画像を直接ご確認ください。
+          </p>
+        </section>
       )}
 
       <section className="stores">

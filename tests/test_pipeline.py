@@ -55,3 +55,23 @@ def test_report_counts(result):
     root, rep = result
     assert rep.products >= 4
     assert rep.stores_ok == 1
+
+
+def test_rerun_next_day_does_not_duplicate(tmp_path):
+    from datetime import date as _date
+    root = tmp_path
+    inbox = root / "inbox" / "union_tomigusuku"
+    inbox.mkdir(parents=True)
+    make_flyer(inbox / "photo_no_period.jpg")  # 期間なしファイル
+    r1 = run(today=_date(2026, 11, 19), base_dir=root)
+    assert r1.products > 0
+    r2 = run(today=_date(2026, 11, 20), base_dir=root)
+    # 同一ファイルの再取込で商品が増えてはならない
+    assert r2.products == 0
+    import sqlite3
+    conn = sqlite3.connect(root / "data" / "radar.sqlite")
+    n = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+    assert n == r1.products
+    # チラシ画像も日次複製されない
+    flyer_dirs = list((root / "data" / "flyers").iterdir())
+    assert len(flyer_dirs) == 1

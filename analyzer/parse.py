@@ -92,8 +92,11 @@ def extract_products(
                 anchors.append((w, p))
 
     used: set[int] = set()
+    consumed_anchors: set[int] = set()
     products: list[RawProduct] = []
     for aw, price in anchors:
+        if id(aw) in consumed_anchors:
+            continue
         # 近傍語収集: 価格の上方・左右にある語を名前/容量候補に
         cx, cy = aw.x + aw.w // 2, aw.y
         group: list[Word] = []
@@ -112,6 +115,20 @@ def extract_products(
         qty: Quantity | None = None
         confs = [aw.conf]
         for w in group:
+            # 分割トークン化した税込表記（例:「98円」の下の「(税込105.84円)」）は
+            # 本体価格と統合し、税込を正とする
+            if ("税込" in w.text and "税込" not in aw.text
+                    and _RE_ANCHOR.search(w.text)):
+                pp = parse_price(w.text)
+                if pp:
+                    price = Price(amount_incl=pp.amount_incl,
+                                  amount_excl=price.amount_incl,
+                                  tax_status="included",
+                                  is_per_100g=price.is_per_100g)
+                    consumed_anchors.add(id(w))
+                    used.add(id(w))
+                    confs.append(w.conf)
+                    continue
             q = parse_quantity(w.text)
             if q and qty is None:
                 qty = q

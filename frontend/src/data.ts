@@ -1,4 +1,4 @@
-import { Ranking, Summary, HistoryEntry } from "./types";
+import { Product, Ranking, Summary, HistoryEntry } from "./types";
 
 const BASE = import.meta.env.BASE_URL;
 
@@ -9,6 +9,7 @@ async function fetchJson<T>(path: string): Promise<T> {
 }
 
 export const loadSummary = () => fetchJson<Summary>("summary.json");
+export const loadReview = () => fetchJson<Product[]>("review.json");
 export const loadRanking = () => fetchJson<Ranking>("ranking.json");
 export const loadHistory = () =>
   fetchJson<Record<string, HistoryEntry>>("history.json");

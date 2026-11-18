@@ -79,3 +79,22 @@ def test_fetch_log(conn):
     log_fetch(conn, "union_tomigusuku", "2026-11-19", "manual", "inbox 2 files")
     row = conn.execute("SELECT status FROM fetch_log").fetchone()
     assert row[0] == "manual"
+
+
+def test_ranking_survives_later_needs_review_row(conn):
+    # 有効行(11/19, 期間〜11/22)の後に同名商品の要確認行(11/20)が入っても
+    # 有効なセールが消えてはならない（最新日サブクエリの欠陥回帰テスト）
+    upsert_products(conn, [item()])
+    upsert_products(conn, [item(date="2026-11-20", price_incl=3.0,
+                                needs_review=1, unit_price=None,
+                                period_start="2026-11-20",
+                                period_end="2026-11-23")])
+    names = [x["name"] for x in ranking(conn, date(2026, 11, 20))]
+    assert "キャベツ" in names
+
+
+def test_unique_applies_with_null_period_end(conn):
+    upsert_products(conn, [item(period_end=None), item(period_end=None)])
+    upsert_products(conn, [item(period_end=None)])
+    rows = conn.execute("SELECT COUNT(*) FROM products").fetchone()[0]
+    assert rows == 1

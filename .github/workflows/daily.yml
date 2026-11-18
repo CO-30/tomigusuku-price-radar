@@ -70,9 +70,9 @@ jobs:
         run: |
           git config user.name "price-radar-bot"
           git config user.email "actions@users.noreply.github.com"
+          git pull --rebase origin main
           git add data/
           git diff --cached --quiet || git commit -m "data: $(TZ=Asia/Tokyo date '+%F %R') 自動更新"
-          git pull --rebase origin main || true
           git push
 
       - name: フロントエンドにデータ同期
@@ -102,8 +102,13 @@ jobs:
           npm ci
           npm run build
 
+      # Pages サイトが未作成の場合の自動有効化を試みる。組織リポジトリでは
+      # GITHUB_TOKEN に権限がなく失敗することがあるため、失敗してもジョブは
+      # 止めない（その場合は Settings → Pages → Source: GitHub Actions を一度
+      # 手動で設定する）。
       - uses: actions/configure-pages@v5
         if: steps.guard.outputs.ran == 'true'
+        continue-on-error: true
         with:
           enablement: true
 

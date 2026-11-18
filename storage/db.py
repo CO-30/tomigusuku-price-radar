@@ -20,8 +20,15 @@ CREATE TABLE IF NOT EXISTS products(
   confidence REAL, needs_review INTEGER DEFAULT 0,
   date TEXT NOT NULL,
   period_start TEXT, period_end TEXT, period_estimated INTEGER DEFAULT 0,
-  flyer_image TEXT, source_url TEXT,
-  UNIQUE(store_id, name, price_incl, period_end)
+  flyer_image TEXT, source_url TEXT
+);
+-- period_end が NULL でも重複排除が効くよう式インデックスで一意制約を張る
+CREATE UNIQUE INDEX IF NOT EXISTS uq_products
+  ON products(store_id, name, price_incl, COALESCE(period_end,''));
+CREATE TABLE IF NOT EXISTS ingested(
+  store_id TEXT NOT NULL, sha1 TEXT NOT NULL, filename TEXT,
+  period_start TEXT, period_end TEXT, first_date TEXT,
+  PRIMARY KEY(store_id, sha1)
 );
 CREATE TABLE IF NOT EXISTS fetch_log(
   store_id TEXT NOT NULL, date TEXT NOT NULL, status TEXT NOT NULL,
@@ -44,6 +51,22 @@ def init_db(path: Path | str) -> sqlite3.Connection:
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
     return conn
+
+
+def was_ingested(conn: sqlite3.Connection, store_id: str, sha1: str) -> dict | None:
+    r = conn.execute("SELECT * FROM ingested WHERE store_id=? AND sha1=?",
+                     (store_id, sha1)).fetchone()
+    return dict(r) if r else None
+
+
+def mark_ingested(conn: sqlite3.Connection, store_id: str, sha1: str,
+                  filename: str, period_start: str | None,
+                  period_end: str | None, first_date: str) -> None:
+    conn.execute(
+        "INSERT OR IGNORE INTO ingested(store_id,sha1,filename,period_start,"
+        "period_end,first_date) VALUES(?,?,?,?,?,?)",
+        (store_id, sha1, filename, period_start, period_end, first_date))
+    conn.commit()
 
 
 def upsert_products(conn: sqlite3.Connection, items: list[dict]) -> int:
@@ -78,7 +101,10 @@ def ranking(conn: sqlite3.Connection, today: date,
       AND (p.period_end IS NULL OR p.period_end >= :t)
       AND (p.period_start IS NULL OR p.period_start <= :t)
       AND p.date = (SELECT MAX(date) FROM products p2
-                    WHERE p2.store_id=p.store_id AND p2.name=p.name)
+                    WHERE p2.store_id=p.store_id AND p2.name=p.name
+                      AND p2.needs_review = 0
+                      AND (p2.period_end IS NULL OR p2.period_end >= :t)
+                      AND (p2.period_start IS NULL OR p2.period_start <= :t))
     """
     args = {"t": t}
     if category:
