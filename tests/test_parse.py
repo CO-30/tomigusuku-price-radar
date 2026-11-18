@@ -1,0 +1,53 @@
+from pathlib import Path
+
+import pytest
+
+from analyzer.ocr import Word, ocr_image
+from analyzer.parse import extract_products
+from tools.make_fixture import make_flyer
+
+FIXTURE = Path(__file__).parent / "fixtures" / "flyer1.png"
+
+
+@pytest.fixture(scope="module")
+def products():
+    if not FIXTURE.exists():
+        make_flyer(FIXTURE)
+    return extract_products(ocr_image(FIXTURE))
+
+
+def test_extracts_cabbage_with_price(products):
+    hits = [p for p in products if "キャベツ" in p.name]
+    assert hits and hits[0].price.amount_incl == 98
+
+
+def test_extracts_eggs_tax_included(products):
+    hits = [p for p in products if "たまご" in p.name or "卵" in p.name]
+    assert hits and hits[0].price.amount_incl == 213
+
+
+def test_extracts_milk_with_quantity(products):
+    hits = [p for p in products if "牛乳" in p.name]
+    assert hits
+    assert hits[0].qty is not None and hits[0].qty.amount == 1000
+
+
+def test_implausible_price_low_confidence():
+    words = [
+        Word("ティッシュ", 10, 10, 100, 30, 90.0),
+        Word("3円", 10, 50, 60, 40, 90.0),  # 誤読価格 (<10円)
+    ]
+    out = extract_products(words)
+    assert all(p.confidence <= 0.3 for p in out if p.price.amount_incl == 3) or not out
+
+
+def test_name_near_price_grouped():
+    words = [
+        Word("りんご", 100, 100, 120, 40, 92.0),
+        Word("398円", 100, 160, 100, 50, 95.0),
+        Word("遠くの文字", 1200, 900, 100, 40, 90.0),
+    ]
+    out = extract_products(words)
+    assert len(out) == 1
+    assert "りんご" in out[0].name
+    assert "遠く" not in out[0].name
