@@ -24,8 +24,9 @@ jobs:
           cache: pip
       - run: pip install -r requirements.txt
       - run: python -m pytest tests/ -v
-      - name: フロントエンドビルド検証
+      - name: フロントエンド テスト＆ビルド検証
         run: |
           cd frontend
           npm ci
+          npm test
           npm run build

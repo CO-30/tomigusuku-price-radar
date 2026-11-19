@@ -1,5 +1,5 @@
 import { useMemo, useState } from "react";
-import { Product, Ranking, Summary, CATEGORY_LABELS, STATUS_LABELS } from "./types";
+import { Fallback, Product, Ranking, Summary, CATEGORY_LABELS, STATUS_LABELS } from "./types";
 import { yen } from "./data";
 
 type SortKey = "unit" | "price" | "store" | "end";
@@ -8,20 +8,29 @@ interface Props {
   summary: Summary;
   ranking: Ranking;
   review: Product[];
+  fallback: Fallback | null;
   onSelect: (p: Product) => void;
+  onGoCamera: () => void;
 }
 
-export function Home({ summary, ranking, review, onSelect }: Props) {
+export function Home({ summary, ranking, review, fallback, onSelect, onGoCamera }: Props) {
   const [cat, setCat] = useState<string>("all");
   const [sort, setSort] = useState<SortKey>("unit");
 
+  // 当日の特売（サーバ＋撮影）が空で、過去の収集結果がある場合はそれを代わりに表示
+  const showingFallback =
+    ranking.all.length === 0 && !!fallback && fallback.all.length > 0;
+  const active: Ranking = showingFallback
+    ? { date: fallback!.date ?? summary.date, all: fallback!.all, categories: groupCats(fallback!.all) }
+    : ranking;
+
   const cats = useMemo(
-    () => Object.keys(ranking.categories).sort(),
-    [ranking]
+    () => Object.keys(active.categories).sort(),
+    [active]
   );
 
   const items = useMemo(() => {
-    const base = cat === "all" ? ranking.all : ranking.categories[cat] ?? [];
+    const base = cat === "all" ? active.all : active.categories[cat] ?? [];
     const arr = [...base];
     const cmp: Record<SortKey, (a: Product, b: Product) => number> = {
       unit: (a, b) =>
@@ -32,7 +41,7 @@ export function Home({ summary, ranking, review, onSelect }: Props) {
       end: (a, b) => (a.period_end ?? "9999").localeCompare(b.period_end ?? "9999"),
     };
     return arr.sort(cmp[sort]);
-  }, [ranking, cat, sort]);
+  }, [active, cat, sort]);
 
   return (
     <>
@@ -51,7 +60,7 @@ export function Home({ summary, ranking, review, onSelect }: Props) {
         )}
       </div>
 
-      <nav className="chips" aria-label="カテゴリ">
+      <nav className="chips chips-top" aria-label="カテゴリ">
         <button className={`chip ${cat === "all" ? "active" : ""}`} onClick={() => setCat("all")}>
           すべて
         </button>
@@ -72,10 +81,20 @@ export function Home({ summary, ranking, review, onSelect }: Props) {
         </select>
       </div>
 
+      {showingFallback && (
+        <div className="fallback-banner">
+          今日の特売はまだ届いていません。
+          <b>{active.date} 時点の最新情報</b>を表示しています。
+        </div>
+      )}
+
       {items.length === 0 ? (
         <div className="empty">
           <b>今日の特売データがまだありません</b>
-          チラシを inbox に投入するか、明朝の自動更新をお待ちください。
+          手元のチラシを撮って解析すれば、すぐランキングに追加できます。
+          <button className="btn primary" style={{ marginTop: 16 }} onClick={onGoCamera}>
+            📷 チラシを撮って解析
+          </button>
         </div>
       ) : (
         <ol className="rows">
@@ -147,4 +166,10 @@ export function Home({ summary, ranking, review, onSelect }: Props) {
       </section>
     </>
   );
+}
+
+function groupCats(items: Product[]): Record<string, Product[]> {
+  const m: Record<string, Product[]> = {};
+  for (const p of items) (m[p.category] ??= []).push(p);
+  return m;
 }

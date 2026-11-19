@@ -114,6 +114,25 @@ def ranking(conn: sqlite3.Connection, today: date,
     return [dict(r) for r in conn.execute(q, args).fetchall()]
 
 
+def fallback_ranking(conn: sqlite3.Connection) -> tuple[str | None, list[dict]]:
+    """当日分が無いとき用に、商品がある最新日の結果を返す（期間切れでも可）。
+
+    戻り値は (その日付, 行リスト)。要確認は除外、単価昇順。
+    """
+    row = conn.execute(
+        "SELECT MAX(date) AS d FROM products WHERE needs_review = 0").fetchone()
+    latest = row["d"] if row else None
+    if not latest:
+        return None, []
+    q = """
+    SELECT p.*, s.name AS store_name, s.area AS store_area
+    FROM products p JOIN stores s ON s.id = p.store_id
+    WHERE p.needs_review = 0 AND p.date = :d
+    ORDER BY (p.unit_price IS NULL), p.unit_price ASC, p.price_incl ASC
+    """
+    return latest, [dict(r) for r in conn.execute(q, {"d": latest}).fetchall()]
+
+
 def review_list(conn: sqlite3.Connection, today: date) -> list[dict]:
     t = today.isoformat()
     q = """

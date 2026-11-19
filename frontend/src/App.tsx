@@ -1,22 +1,26 @@
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { Home } from "./Home";
 import { ShopList } from "./ShopList";
 import { Settings, alertHits } from "./Settings";
 import { Detail } from "./Detail";
-import { loadHistory, loadRanking, loadReview, loadSummary } from "./data";
+import { Camera } from "./Camera";
+import { loadFallback, loadHistory, loadRanking, loadReview, loadSummary } from "./data";
 import { AlertRule, usePersistent } from "./store";
-import { HistoryEntry, Product, Ranking, Summary } from "./types";
+import { todaysCaptureProducts } from "./captures";
+import { Fallback, HistoryEntry, Product, Ranking, Summary } from "./types";
 
-type Tab = "home" | "list" | "settings";
+type Tab = "home" | "camera" | "list" | "settings";
 
 export default function App() {
   const [summary, setSummary] = useState<Summary | null>(null);
   const [ranking, setRanking] = useState<Ranking | null>(null);
+  const [fallback, setFallback] = useState<Fallback | null>(null);
   const [history, setHistory] = useState<Record<string, HistoryEntry>>({});
   const [review, setReview] = useState<Product[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [tab, setTab] = useState<Tab>("home");
   const [selected, setSelected] = useState<Product | null>(null);
+  const [captureTick, setCaptureTick] = useState(0);
 
   const [favorites, setFavorites] = usePersistent<string[]>("pr:favorites", []);
   const [list, setList] = usePersistent<string[]>("pr:shoplist", []);
@@ -31,14 +35,31 @@ export default function App() {
       })
       .catch((e) => setError(String(e)));
     loadReview().then(setReview).catch(() => setReview([]));
+    loadFallback().then(setFallback).catch(() => setFallback(null));
   }, []);
 
+  const onCaptured = useCallback(() => setCaptureTick((t) => t + 1), []);
+
+  // サーバのランキング + 当日の撮影商品を合流し、単価順に並べ直す
+  const merged = useMemo<Ranking | null>(() => {
+    if (!summary) return ranking;
+    const caps = todaysCaptureProducts(summary.date);
+    if (!ranking) {
+      if (!caps.length) return null;
+      return { date: summary.date, all: caps, categories: groupBy(caps) };
+    }
+    if (!caps.length) return ranking;
+    const all = [...ranking.all, ...caps].sort(byUnit);
+    return { date: ranking.date, all, categories: groupBy(all) };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [ranking, summary, captureTick]);
+
   const nAlerts = useMemo(
-    () => (ranking ? alertHits(ranking, alerts).length : 0),
-    [ranking, alerts]
+    () => (merged ? alertHits(merged, alerts).length : 0),
+    [merged, alerts]
   );
 
-  if (error)
+  if (error && !summary)
     return (
       <div className="app">
         <div className="empty">
@@ -47,7 +68,7 @@ export default function App() {
         </div>
       </div>
     );
-  if (!summary || !ranking)
+  if (!summary || !merged)
     return <div className="loading">読み込み中…</div>;
 
   const favSet = new Set(favorites);
@@ -66,14 +87,22 @@ export default function App() {
       </header>
 
       {tab === "home" && (
-        <Home summary={summary} ranking={ranking} review={review} onSelect={setSelected} />
+        <Home
+          summary={summary}
+          ranking={merged}
+          review={review}
+          fallback={fallback}
+          onSelect={setSelected}
+          onGoCamera={() => setTab("camera")}
+        />
       )}
+      {tab === "camera" && <Camera today={summary.date} onCaptured={onCaptured} />}
       {tab === "list" && (
-        <ShopList ranking={ranking} list={list} setList={setList} onSelect={setSelected} />
+        <ShopList ranking={merged} list={list} setList={setList} onSelect={setSelected} />
       )}
       {tab === "settings" && (
         <Settings
-          ranking={ranking}
+          ranking={merged}
           favorites={favorites}
           setFavorites={setFavorites}
           alerts={alerts}
@@ -110,8 +139,11 @@ export default function App() {
           <button className={`tab ${tab === "home" ? "active" : ""}`} onClick={() => setTab("home")}>
             <span className="ico">📰</span>今日の特売
           </button>
+          <button className={`tab ${tab === "camera" ? "active" : ""}`} onClick={() => setTab("camera")}>
+            <span className="ico">📷</span>撮って解析
+          </button>
           <button className={`tab ${tab === "list" ? "active" : ""}`} onClick={() => setTab("list")}>
-            <span className="ico">🧺</span>買い物リスト
+            <span className="ico">🧺</span>リスト
           </button>
           <button className={`tab ${tab === "settings" ? "active" : ""}`} onClick={() => setTab("settings")}>
             <span className="ico">⚙️</span>アラート{nAlerts > 0 ? `(${nAlerts})` : ""}
@@ -120,4 +152,17 @@ export default function App() {
       </nav>
     </div>
   );
+}
+
+function byUnit(a: Product, b: Product): number {
+  return (
+    (a.unit_price ?? Infinity) - (b.unit_price ?? Infinity) ||
+    a.price_incl - b.price_incl
+  );
+}
+
+function groupBy(items: Product[]): Record<string, Product[]> {
+  const m: Record<string, Product[]> = {};
+  for (const p of items) (m[p.category] ??= []).push(p);
+  return m;
 }

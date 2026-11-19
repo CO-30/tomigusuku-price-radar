@@ -152,6 +152,15 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
 
     review = dbm.review_list(conn, today)
 
+    # 当日分が無いとき用の最新スナップショット（期間切れでも直近の収集結果を見せる）
+    fb_date, fb_rows = dbm.fallback_ranking(conn)
+    for row in fb_rows:
+        stats = dbm.price_stats(conn, row["name"], row["store_id"], today)
+        row["stats"] = {k: stats[k] for k in
+                        ("previous_price", "min_7d", "min_30d", "avg_30d")}
+    fallback = {"date": fb_date, "stale": bool(fb_date and fb_date < t),
+                "all": fb_rows}
+
     summary = {
         "date": t, "updated_at": now,
         "stores_total": len(stores),
@@ -170,6 +179,8 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
         json.dumps(history, ensure_ascii=False), encoding="utf-8")
     (public / "review.json").write_text(
         json.dumps(review, ensure_ascii=False), encoding="utf-8")
+    (public / "fallback.json").write_text(
+        json.dumps(fallback, ensure_ascii=False), encoding="utf-8")
 
     conn.close()
     return Report(date=t, stores_ok=summary["stores_ok"],

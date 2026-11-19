@@ -198,3 +198,28 @@ body {
   @keyframes rise { from { transform: translateY(24px); opacity: 0.6; } }
 }
 :focus-visible { outline: 2px solid var(--deal); outline-offset: 2px; }
+
+/* ── カメラ・撮影解析 ─────────────────── */
+.fallback-banner {
+  margin: 10px 16px 0; padding: 10px 14px; font-size: 13px;
+  background: #b977000f; border-left: 3px solid var(--warn);
+  border-radius: 0 8px 8px 0; color: var(--ink);
+}
+.fallback-banner b { color: var(--warn); }
+.addform-store {
+  width: 100%; font-family: inherit; font-size: 14px; padding: 10px 12px;
+  border: 1px solid var(--line); border-radius: 8px; background: #fff;
+  margin: 4px 0 12px;
+}
+.camera-btn { width: 100%; padding: 16px; font-size: 16px; }
+.capture-result { margin-top: 18px; }
+.capture-result h3 { font-size: 15px; margin: 8px 0; }
+.capture-row {
+  display: grid; grid-template-columns: 48px 1fr auto; gap: 10px;
+  align-items: center; padding: 8px 0; border-bottom: 1px solid var(--line);
+}
+.capture-thumb {
+  width: 48px; height: 48px; object-fit: cover; border-radius: 6px;
+  border: 1px solid var(--line);
+}
+.row .meta .cap-tag { color: var(--warn); font-weight: 700; }

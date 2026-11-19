@@ -38,6 +38,7 @@ export interface Product {
   period_estimated: number;
   flyer_image: string | null;
   source_url: string | null;
+  captured?: boolean;
   bargain?: boolean;
   stats?: {
     previous_price: number | null;
@@ -51,6 +52,12 @@ export interface Ranking {
   date: string;
   all: Product[];
   categories: Record<string, Product[]>;
+}
+
+export interface Fallback {
+  date: string | null;
+  stale: boolean;
+  all: Product[];
 }
 
 export interface HistoryEntry {
