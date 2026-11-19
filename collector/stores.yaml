@@ -3,9 +3,14 @@
 #   auto   - 公式公開ソースを robots.txt 判定の上で自動取得（url 必須）
 #   manual - 自動取得不可（robots/規約/Bot拒否を確認済み）。inbox/<id>/ への
 #            手動投入（チラシ撮影・スクショ）で補完する。
-# 2026-11-19 調査: 県内主要チェーンのWebチラシはトクバイ集約だが、トクバイは
-# AIクローラー全面拒否、各社公式もBot拒否のため manual 開始。probe ワークフローで
-# 定期的に再調査し、許可されたソースが見つかり次第 auto に昇格する。
+# 2026-11-19 調査(確定): 県内主要チェーンのWebチラシは例外なくトクバイ集約で、
+# トクバイは robots.txt で ClaudeBot/anthropic-ai/Claude-Web を Disallow: / 全面拒否。
+# イオン琉球公式(www.aeon-ryukyu.jp)は robots 上は取得可だが、チラシ実体を持たず
+# widgets.tokubai.co.jp を埋め込むだけ(例: つかざん店=トクバイ店舗ID 124230)。
+# 業務スーパー・ドンキ公式も robots 拒否。= 規約を守る限り自動収集できるソースは現状ゼロ。
+# よって全店 manual。データ源はアプリ内の撮影/スクショ取込と inbox 手動投入。
+# flyer_url は「人が開いてスクショする」ための導線なので、イオン系は公式店舗ページの
+# #webpaper を指す(一次情報・店舗別・URLが安定)。probe/explore で定期的に再調査する。
 stores:
   # ── 豊見城市（第一優先）─────────────────────────
   - id: union_tomigusuku
@@ -18,14 +23,14 @@ stores:
     name: マックスバリュ 豊見城店
     chain: aeon
     area: 豊見城市
-    source: {type: manual, note: "チラシはトクバイwidget。トクバイはAIクローラー拒否"}
-    flyer_url: https://tokubai.co.jp/13024
+    source: {type: manual, note: "公式ページのチラシ欄はトクバイwidget。トクバイはAIクローラー拒否"}
+    flyer_url: https://www.aeon-ryukyu.jp/store/maxvalu/tomishiro/#webpaper
   - id: maxvalu_toyomi
     name: マックスバリュ とよみ店
     chain: aeon
     area: 豊見城市
     source: {type: manual, note: "同上"}
-    flyer_url: https://tokubai.co.jp/13027
+    flyer_url: https://www.aeon-ryukyu.jp/store/maxvalu/toyomi/#webpaper
   - id: kanehide_tomigusuku_danchi
     name: タウンプラザかねひで 豊見城団地前店
     chain: kanehide
@@ -60,8 +65,8 @@ stores:
     name: イオンスタイル 豊崎
     chain: aeon
     area: 豊見城市
-    source: {type: manual, note: "チラシはトクバイwidget"}
-    flyer_url: https://tokubai.co.jp/177953
+    source: {type: manual, note: "公式ページのチラシ欄はトクバイwidget"}
+    flyer_url: https://www.aeon-ryukyu.jp/store/aeon/toyosaki/#webpaper
   - id: donki_tomigusuku
     name: MEGAドン・キホーテ 豊見城店
     chain: donki
@@ -72,8 +77,8 @@ stores:
     name: マックスバリュ 武富店
     chain: aeon
     area: 豊見城市
-    source: {type: manual, note: "チラシはトクバイwidget"}
-    flyer_url: https://tokubai.co.jp/prefectures/47/areas/1073/leaflet
+    source: {type: manual, note: "公式ページのチラシ欄はトクバイwidget"}
+    flyer_url: https://www.aeon-ryukyu.jp/store/maxvalu/taketomi/#webpaper
   # ── 糸満市・南風原町（第二優先）───────────────────
   - id: gyomu_itoman
     name: 業務スーパー 糸満店
@@ -94,15 +99,15 @@ stores:
     source: {type: manual, note: "公式サイト robots 拒否"}
     flyer_url: https://tokubai.co.jp/prefectures/47/areas/1073/leaflet
   - id: bigexpress_tsukazan
-    name: ザ・ビッグエクスプレス 津嘉山店
+    name: ザ・ビッグエクスプレス 津嘉山(つかざん)店
     chain: aeon
     area: 南風原町
-    source: {type: manual, note: "チラシはトクバイwidget"}
-    flyer_url: https://tokubai.co.jp/prefectures/47/areas/1073/leaflet
+    source: {type: manual, note: "公式ページのチラシ欄はトクバイwidget(店舗ID 124230)"}
+    flyer_url: https://www.aeon-ryukyu.jp/store/thebig/tukazan/#webpaper
   # ── 那覇市小禄周辺（第三優先）─────────────────────
   - id: bigexpress_oroku
     name: ザ・ビッグエクスプレス 小禄店
     chain: aeon
     area: 那覇市小禄
-    source: {type: manual, note: "チラシはトクバイwidget"}
-    flyer_url: https://tokubai.co.jp/prefectures/47/areas/1073/leaflet
+    source: {type: manual, note: "公式ページのチラシ欄はトクバイwidget"}
+    flyer_url: https://www.aeon-ryukyu.jp/store/thebig/oroku/#webpaper
