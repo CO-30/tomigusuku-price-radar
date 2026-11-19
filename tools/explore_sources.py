@@ -52,6 +52,13 @@ def dump(name: str, url: str) -> None:
                 break
         for m in IMG.finditer(html):
             print(f"  IMGREF {m.group(1)}")
+        # 明示URL調査時は全画像・iframe・PDF・JSON参照も出す
+        for m in re.finditer(r'<img[^>]+src="([^"]+)"', html, re.I):
+            print(f"  IMG {m.group(1)}")
+        for m in re.finditer(r'<iframe[^>]+src="([^"]+)"', html, re.I):
+            print(f"  IFRAME {m.group(1)}")
+        for m in re.finditer(r'"([^"]+\.(?:pdf|jpg|jpeg|png|json))"', html, re.I):
+            print(f"  REF {m.group(1)}")
     except Exception as e:
         print(f"  ERR {type(e).__name__}: {e}")
 
