@@ -21,4 +21,4 @@ jobs:
         with:
           python-version: "3.12"
       - run: pip install requests pyyaml
-      - run: python tools/explore_sources.py ${{ inputs.urls }}
+      - run: python -m tools.explore_sources ${{ inputs.urls }}
