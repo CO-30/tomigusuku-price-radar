@@ -1,6 +1,6 @@
 {
  "date": "2026-11-19",
- "updated_at": "2026-11-19 09:10",
+ "updated_at": "2026-11-19 09:27",
  "stores_total": 16,
  "stores_ok": 0,
  "products_total": 0,
@@ -11,6 +11,7 @@
    "id": "bigexpress_tsukazan",
    "name": "ザ・ビッグエクスプレス 津嘉山店",
    "area": "南風原町",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -18,6 +19,7 @@
    "id": "gyomu_haebaru",
    "name": "業務スーパー 南風原店",
    "area": "南風原町",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -25,6 +27,7 @@
    "id": "kanehide_nishizaki",
    "name": "タウンプラザかねひで 西崎店",
    "area": "糸満市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -32,6 +35,7 @@
    "id": "gyomu_itoman",
    "name": "業務スーパー 糸満店",
    "area": "糸満市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -39,6 +43,7 @@
    "id": "acoop_tomieru",
    "name": "Aコープ とみえ〜る店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -46,6 +51,7 @@
    "id": "donki_tomigusuku",
    "name": "MEGAドン・キホーテ 豊見城店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -53,6 +59,7 @@
    "id": "aeonstyle_toyosaki",
    "name": "イオンスタイル 豊崎",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/177953",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -60,6 +67,7 @@
    "id": "sanei_v21_gibo",
    "name": "サンエー V21ぎぼ食品館",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -67,6 +75,7 @@
    "id": "kanehide_tomigusuku_danchi",
    "name": "タウンプラザかねひで 豊見城団地前店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -74,6 +83,7 @@
    "id": "direx_tomigusuku",
    "name": "ダイレックス 豊見城店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -81,6 +91,7 @@
    "id": "union_tomigusuku",
    "name": "フレッシュプラザユニオン 豊見城店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -88,6 +99,7 @@
    "id": "maxvalu_toyomi",
    "name": "マックスバリュ とよみ店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/13027",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -95,6 +107,7 @@
    "id": "maxvalu_dakejin",
    "name": "マックスバリュ 武富店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -102,6 +115,7 @@
    "id": "maxvalu_tomigusuku",
    "name": "マックスバリュ 豊見城店",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/13024",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -109,6 +123,7 @@
    "id": "ryubo_toyosaki",
    "name": "リウボウ 豊崎食品館",
    "area": "豊見城市",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -116,6 +131,7 @@
    "id": "bigexpress_oroku",
    "name": "ザ・ビッグエクスプレス 小禄店",
    "area": "那覇市小禄",
+   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   }
