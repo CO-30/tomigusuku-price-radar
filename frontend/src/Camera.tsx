@@ -40,7 +40,11 @@ async function prepImage(file: File): Promise<{ canvas: HTMLCanvasElement; thumb
 }
 
 export function Camera({ today, onCaptured }: Props) {
-  const fileRef = useRef<HTMLInputElement>(null);
+  // カメラ直結用と、写真ライブラリ（スクショを含む）用を分ける。
+  // capture 属性を付けた input は iOS でカメラ固定になり、保存済みスクショを
+  // 選べない。公式チラシを開いてスクショ→選ぶ、という導線のために必須。
+  const camRef = useRef<HTMLInputElement>(null);
+  const libRef = useRef<HTMLInputElement>(null);
   const [phase, setPhase] = useState<Phase>("idle");
   const [status, setStatus] = useState("");
   const [result, setResult] = useState<Product[] | null>(null);
@@ -48,33 +52,46 @@ export function Camera({ today, onCaptured }: Props) {
     loadCaptures().filter((c) => c.date === today)
   );
 
-  const onFile = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
+  const onFiles = async (e: React.ChangeEvent<HTMLInputElement>, origin: string) => {
+    const files = Array.from(e.target.files ?? []);
+    const input = e.target;
+    if (files.length === 0) return;
     setPhase("working");
     setResult(null);
-    setStatus("画像を準備中…");
-    try {
-      const { canvas, thumb } = await prepImage(file);
-      setStatus("文字を読み取り中…（初回は辞書を取得します）");
-      const words = await recognizeImage(canvas, (s, p) => {
-        if (s === "recognizing text") setStatus(`解析中… ${Math.round(p * 100)}%`);
-        else if (s.includes("loading") || s.includes("initial")) setStatus("日本語辞書を準備中…");
-      });
-      const products = wordsToProducts(words, "", today, thumb);
-      const cap: Capture = { date: today, store: "撮影", thumb, products };
-      const all = [...loadCaptures(), cap];
-      saveCaptures(all);
-      setCaptures(all.filter((c) => c.date === today));
-      setResult(products);
-      setPhase("done");
-      onCaptured();
-    } catch (err) {
-      setStatus("読み取りに失敗しました。明るく正面から撮り直してください。");
-      setPhase("idle");
-    } finally {
-      if (fileRef.current) fileRef.current.value = "";
+    const found: Product[] = [];
+    let failed = 0;
+
+    for (const [idx, file] of files.entries()) {
+      const pos = files.length > 1 ? `（${idx + 1}/${files.length}枚目）` : "";
+      try {
+        setStatus(`画像を準備中…${pos}`);
+        const { canvas, thumb } = await prepImage(file);
+        setStatus(`文字を読み取り中…${pos}（初回は辞書を取得します）`);
+        const words = await recognizeImage(canvas, (s, p) => {
+          if (s === "recognizing text") setStatus(`解析中… ${Math.round(p * 100)}%${pos}`);
+          else if (s.includes("loading") || s.includes("initial")) setStatus("日本語辞書を準備中…");
+        });
+        const products = wordsToProducts(words, "", today, thumb);
+        const cap: Capture = { date: today, store: origin, thumb, products };
+        saveCaptures([...loadCaptures(), cap]);
+        found.push(...products);
+      } catch {
+        failed += 1;
+      }
     }
+
+    setCaptures(loadCaptures().filter((c) => c.date === today));
+    input.value = "";
+
+    if (found.length === 0 && failed === files.length) {
+      setStatus("読み取りに失敗しました。明るく正面から撮り直すか、別の画像でお試しください。");
+      setPhase("idle");
+      return;
+    }
+    setStatus(failed > 0 ? `${failed}枚は読み取れませんでした。` : "");
+    setResult(found);
+    setPhase("done");
+    onCaptured();
   };
 
   const removeCapture = (idx: number) => {
@@ -87,29 +104,48 @@ export function Camera({ today, onCaptured }: Props) {
   };
 
   const totalFound = captures.reduce((s, c) => s + c.products.length, 0);
+  const busy = phase === "working";
 
   return (
     <div className="page">
       <input
-        ref={fileRef}
+        ref={camRef}
         type="file"
         accept="image/*"
         capture="environment"
-        onChange={onFile}
+        onChange={(e) => onFiles(e, "撮影")}
         style={{ display: "none" }}
       />
+      <input
+        ref={libRef}
+        type="file"
+        accept="image/*"
+        multiple
+        onChange={(e) => onFiles(e, "画像")}
+        style={{ display: "none" }}
+      />
+
       <button
         className="btn primary camera-btn"
-        onClick={() => fileRef.current?.click()}
-        disabled={phase === "working"}
+        onClick={() => camRef.current?.click()}
+        disabled={busy}
       >
-        {phase === "working" ? "解析中…" : "📷 チラシを撮る"}
+        {busy ? "解析中…" : "📷 その場で撮る"}
       </button>
+      <button
+        className="btn camera-btn secondary"
+        onClick={() => libRef.current?.click()}
+        disabled={busy}
+      >
+        {busy ? "解析中…" : "🖼 スクショ・写真から選ぶ"}
+      </button>
+
       <p className="note" style={{ textAlign: "center" }}>
-        撮るだけで商品・価格・単価を自動で読み取り、今日のランキングに加えます。
+        店頭のチラシはそのまま撮影。公式チラシは「チラシ ›」で開いて
+        スクリーンショットを撮り、こちらから選べば同じように解析されます（複数枚まとめて可）。
       </p>
 
-      {phase === "working" && <p className="note">{status}</p>}
+      {busy && <p className="note">{status}</p>}
       {phase === "idle" && status && <p className="note">{status}</p>}
 
       {result && (
@@ -119,9 +155,11 @@ export function Camera({ today, onCaptured }: Props) {
               ? `${result.length}件を読み取りました`
               : "商品を読み取れませんでした"}
           </h3>
+          {status && <p className="note">{status}</p>}
           {result.length === 0 && (
             <p className="note">
               価格が大きく写るように、1商品ずつ正面から撮ると精度が上がります。
+              スクショの場合は、チラシを拡大してから撮ると読み取れることがあります。
             </p>
           )}
           {result.map((p, i) => (
@@ -144,11 +182,11 @@ export function Camera({ today, onCaptured }: Props) {
       {captures.length > 0 && (
         <>
           <h3 style={{ marginTop: 24 }}>
-            今日の撮影（{captures.length}枚・{totalFound}件）
+            今日の読み取り（{captures.length}枚・{totalFound}件）
           </h3>
           {captures.map((c, i) => (
             <div className="capture-row" key={i}>
-              <img src={c.thumb} alt="撮影したチラシ" className="capture-thumb" />
+              <img src={c.thumb} alt="読み取ったチラシ" className="capture-thumb" />
               <span>
                 {c.store} <span className="note">{c.products.length}件</span>
               </span>

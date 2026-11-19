@@ -212,6 +212,7 @@ body {
   margin: 4px 0 12px;
 }
 .camera-btn { width: 100%; padding: 16px; font-size: 16px; }
+.camera-btn + .camera-btn { margin-top: 10px; }
 .capture-result { margin-top: 18px; }
 .capture-result h3 { font-size: 15px; margin: 8px 0; }
 .capture-row {
