@@ -11,7 +11,56 @@ interface Props {
 
 type Phase = "idle" | "working" | "done";
 
-// 画像を長辺1600pxに縮小しOCR精度と速度のバランスを取る + サムネイルを作る
+// チラシ1枚を丸ごと写した画像は、縮小すると価格の文字が潰れてOCRが読めない。
+// 長辺2400pxを目標に（元より大きくはしすぎない範囲で）調整し、
+// カラーかぶりに強いグレースケール化＋コントラスト伸長をかけてから渡す。
+const OCR_TARGET = 2400;
+
+// 端末のカラーフィルタが効いたスクショは特定チャンネルが潰れるため、
+// 最も分散の大きいチャンネルを選び、2〜98パーセンタイルで伸長する。
+function toContrastGray(ctx: CanvasRenderingContext2D, w: number, h: number) {
+  const im = ctx.getImageData(0, 0, w, h);
+  const d = im.data;
+  const n = w * h;
+  const sum = [0, 0, 0];
+  for (let i = 0; i < n; i++) {
+    sum[0] += d[i * 4];
+    sum[1] += d[i * 4 + 1];
+    sum[2] += d[i * 4 + 2];
+  }
+  const mean = sum.map((v) => v / n);
+  const varc = [0, 0, 0];
+  for (let i = 0; i < n; i++) {
+    for (let c = 0; c < 3; c++) {
+      const diff = d[i * 4 + c] - mean[c];
+      varc[c] += diff * diff;
+    }
+  }
+  let ch = 0;
+  if (varc[1] > varc[ch]) ch = 1;
+  if (varc[2] > varc[ch]) ch = 2;
+
+  const hist = new Uint32Array(256);
+  for (let i = 0; i < n; i++) hist[d[i * 4 + ch]]++;
+  const lowCut = n * 0.02;
+  const highCut = n * 0.98;
+  let acc = 0;
+  let lo = 0;
+  let hi = 255;
+  for (let v = 0; v < 256; v++) {
+    acc += hist[v];
+    if (acc <= lowCut) lo = v;
+    if (acc <= highCut) hi = v;
+  }
+  const span = Math.max(1, hi - lo);
+  for (let i = 0; i < n; i++) {
+    let v = ((d[i * 4 + ch] - lo) * 255) / span;
+    v = v < 0 ? 0 : v > 255 ? 255 : v;
+    d[i * 4] = d[i * 4 + 1] = d[i * 4 + 2] = v;
+  }
+  ctx.putImageData(im, 0, 0);
+}
+
 async function prepImage(file: File): Promise<{ canvas: HTMLCanvasElement; thumb: string }> {
   const url = URL.createObjectURL(file);
   try {
@@ -22,18 +71,24 @@ async function prepImage(file: File): Promise<{ canvas: HTMLCanvasElement; thumb
       i.src = url;
     });
     const long = Math.max(img.width, img.height);
-    const scale = long > 1600 ? 1600 / long : 1;
+    // 小さい画像は最大2倍まで拡大、大きい画像も2400pxまでしか縮めない
+    const scale = Math.min(2, OCR_TARGET / long);
     const canvas = document.createElement("canvas");
-    canvas.width = Math.round(img.width * scale);
-    canvas.height = Math.round(img.height * scale);
-    const ctx = canvas.getContext("2d")!;
+    canvas.width = Math.max(1, Math.round(img.width * scale));
+    canvas.height = Math.max(1, Math.round(img.height * scale));
+    const ctx = canvas.getContext("2d", { willReadFrequently: true })!;
     ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+
+    // サムネイルは加工前のカラー画像から作る（利用者が見て判別できるように）
     const tc = document.createElement("canvas");
     const ts = 240 / Math.max(canvas.width, canvas.height);
-    tc.width = Math.round(canvas.width * ts);
-    tc.height = Math.round(canvas.height * ts);
+    tc.width = Math.max(1, Math.round(canvas.width * ts));
+    tc.height = Math.max(1, Math.round(canvas.height * ts));
     tc.getContext("2d")!.drawImage(canvas, 0, 0, tc.width, tc.height);
-    return { canvas, thumb: tc.toDataURL("image/jpeg", 0.6) };
+    const thumb = tc.toDataURL("image/jpeg", 0.6);
+
+    toContrastGray(ctx, canvas.width, canvas.height);
+    return { canvas, thumb };
   } finally {
     URL.revokeObjectURL(url);
   }
@@ -143,6 +198,11 @@ export function Camera({ today, onCaptured }: Props) {
       <p className="note" style={{ textAlign: "center" }}>
         店頭のチラシはそのまま撮影。公式チラシは「チラシ ›」で開いて
         スクリーンショットを撮り、こちらから選べば同じように解析されます（複数枚まとめて可）。
+      </p>
+      <p className="note" style={{ textAlign: "center" }}>
+        <b>読み取りの限界:</b> チラシの大きな特価数字は装飾フォントのため、
+        現状のOCRではほとんど読み取れません（実測：既知価格19件中3件）。
+        小さな通常フォントの文字は読めます。読めなかった分は手入力してください。
       </p>
 
       {busy && <p className="note">{status}</p>}
