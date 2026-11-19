@@ -81,6 +81,17 @@ def test_fetch_log(conn):
     assert row[0] == "manual"
 
 
+def test_store_statuses_includes_flyer_url(conn):
+    from storage.db import store_statuses
+    conn.execute("UPDATE stores SET flyer_url=? WHERE id=?",
+                 ("https://tokubai.co.jp/13024", "union_tomigusuku"))
+    conn.commit()
+    log_fetch(conn, "union_tomigusuku", "2026-11-19", "manual", "")
+    rows = store_statuses(conn, "2026-11-19")
+    r = next(x for x in rows if x["id"] == "union_tomigusuku")
+    assert r["flyer_url"] == "https://tokubai.co.jp/13024"
+
+
 def test_ranking_survives_later_needs_review_row(conn):
     # 有効行(11/19, 期間〜11/22)の後に同名商品の要確認行(11/20)が入っても
     # 有効なセールが消えてはならない（最新日サブクエリの欠陥回帰テスト）

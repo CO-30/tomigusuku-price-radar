@@ -60,6 +60,10 @@ export function Home({ summary, ranking, review, fallback, onSelect, onGoCamera 
         )}
       </div>
 
+      <button className="home-shoot" onClick={onGoCamera}>
+        📷 チラシを撮る <span>→ その場で解析</span>
+      </button>
+
       <nav className="chips chips-top" aria-label="カテゴリ">
         <button className={`chip ${cat === "all" ? "active" : ""}`} onClick={() => setCat("all")}>
           すべて
@@ -151,17 +155,26 @@ export function Home({ summary, ranking, review, fallback, onSelect, onGoCamera 
 
       <section className="stores">
         <h3>店舗別の取得状況（{summary.date}）</h3>
-        {summary.stores.map((s) => (
-          <div className="store-item" key={s.id}>
-            <span>
-              {s.name} <span className="note">{s.area}</span>
-            </span>
-            <span className={`st ${s.status}`}>{STATUS_LABELS[s.status]}</span>
-          </div>
-        ))}
+        {summary.stores.map((s) =>
+          s.flyer_url ? (
+            <a className="store-item store-link" key={s.id} href={s.flyer_url} target="_blank" rel="noreferrer">
+              <span>
+                {s.name} <span className="note">{s.area}</span>
+              </span>
+              <span className="flyer-go">チラシ ›</span>
+            </a>
+          ) : (
+            <div className="store-item" key={s.id}>
+              <span>
+                {s.name} <span className="note">{s.area}</span>
+              </span>
+              <span className={`st ${s.status}`}>{STATUS_LABELS[s.status]}</span>
+            </div>
+          )
+        )}
         <p className="note">
-          「取得制限」は robots.txt 等で自動収集が許可されていない店舗です。チラシを撮影して
-          GitHub の inbox フォルダに入れると翌朝のランキングに反映されます。
+          各店の「チラシ ›」で公式の特売チラシをそのまま開けます。自分で撮ったチラシは
+          上の「チラシを撮る」で即解析してランキングに加わります。
         </p>
       </section>
     </>

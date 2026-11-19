@@ -223,3 +223,18 @@ body {
   border: 1px solid var(--line);
 }
 .row .meta .cap-tag { color: var(--warn); font-weight: 700; }
+
+/* ── 操作最小化: ホームの撮影ボタン・店舗チラシリンク ── */
+.home-shoot {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: calc(100% - 32px); margin: 12px 16px 2px; padding: 14px;
+  font-family: inherit; font-size: 16px; font-weight: 700;
+  color: var(--paper); background: var(--ink); border: none;
+  border-radius: 12px; cursor: pointer;
+}
+.home-shoot span { font-weight: 500; font-size: 13px; opacity: 0.85; }
+.store-link {
+  text-decoration: none; color: var(--ink);
+}
+.store-link:active { background: var(--chip); }
+.flyer-go { color: var(--tag-red); font-weight: 700; font-size: 13px; white-space: nowrap; }

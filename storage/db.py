@@ -8,7 +8,7 @@ from pathlib import Path
 SCHEMA = """
 CREATE TABLE IF NOT EXISTS stores(
   id TEXT PRIMARY KEY, name TEXT NOT NULL, area TEXT, chain TEXT,
-  source_type TEXT, url TEXT
+  source_type TEXT, url TEXT, flyer_url TEXT
 );
 CREATE TABLE IF NOT EXISTS products(
   id INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -50,6 +50,11 @@ def init_db(path: Path | str) -> sqlite3.Connection:
     conn = sqlite3.connect(str(path))
     conn.row_factory = sqlite3.Row
     conn.executescript(SCHEMA)
+    # 既存DBへの列追加（マイグレーション）
+    cols = {r[1] for r in conn.execute("PRAGMA table_info(stores)")}
+    if "flyer_url" not in cols:
+        conn.execute("ALTER TABLE stores ADD COLUMN flyer_url TEXT")
+    conn.commit()
     return conn
 
 
@@ -170,7 +175,7 @@ def price_stats(conn: sqlite3.Connection, name: str, store_id: str,
 
 def store_statuses(conn: sqlite3.Connection, d: str) -> list[dict]:
     q = """
-    SELECT s.id, s.name, s.area, COALESCE(f.status,'failed') AS status,
+    SELECT s.id, s.name, s.area, s.flyer_url, COALESCE(f.status,'failed') AS status,
            COALESCE(f.detail,'') AS detail
     FROM stores s LEFT JOIN fetch_log f ON f.store_id=s.id AND f.date=?
     ORDER BY s.area, s.name

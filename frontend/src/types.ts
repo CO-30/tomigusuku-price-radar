@@ -2,6 +2,7 @@ export interface StoreStatus {
   id: string;
   name: string;
   area: string;
+  flyer_url: string | null;
   status: "ok" | "failed" | "blocked" | "no_flyer" | "unsupported" | "manual";
   detail: string;
 }

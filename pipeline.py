@@ -59,10 +59,11 @@ def run(today: date | None = None, base_dir: Path | str = ".") -> Report:
     stores = load_stores()
     for s in stores:
         conn.execute(
-            "INSERT OR REPLACE INTO stores(id,name,area,chain,source_type,url) "
-            "VALUES(?,?,?,?,?,?)",
+            "INSERT OR REPLACE INTO stores(id,name,area,chain,source_type,url,flyer_url) "
+            "VALUES(?,?,?,?,?,?,?)",
             (s["id"], s["name"], s.get("area"), s.get("chain"),
-             s.get("source", {}).get("type"), s.get("source", {}).get("url")))
+             s.get("source", {}).get("type"), s.get("source", {}).get("url"),
+             s.get("flyer_url")))
     conn.commit()
 
     # 1. 収集

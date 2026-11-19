@@ -41,7 +41,6 @@ async function prepImage(file: File): Promise<{ canvas: HTMLCanvasElement; thumb
 
 export function Camera({ today, onCaptured }: Props) {
   const fileRef = useRef<HTMLInputElement>(null);
-  const [store, setStore] = useState("");
   const [phase, setPhase] = useState<Phase>("idle");
   const [status, setStatus] = useState("");
   const [result, setResult] = useState<Product[] | null>(null);
@@ -62,8 +61,8 @@ export function Camera({ today, onCaptured }: Props) {
         if (s === "recognizing text") setStatus(`解析中… ${Math.round(p * 100)}%`);
         else if (s.includes("loading") || s.includes("initial")) setStatus("日本語辞書を準備中…");
       });
-      const products = wordsToProducts(words, store, today, thumb);
-      const cap: Capture = { date: today, store: store || "撮影", thumb, products };
+      const products = wordsToProducts(words, "", today, thumb);
+      const cap: Capture = { date: today, store: "撮影", thumb, products };
       const all = [...loadCaptures(), cap];
       saveCaptures(all);
       setCaptures(all.filter((c) => c.date === today));
@@ -91,20 +90,6 @@ export function Camera({ today, onCaptured }: Props) {
 
   return (
     <div className="page">
-      <h2>チラシを撮って解析</h2>
-      <p className="note">
-        店頭や折込チラシをカメラで撮ると、その場で商品・価格・単価を読み取って
-        今日のランキングに加えます。アップロードは不要で、解析はこの端末内で完結します。
-      </p>
-
-      <input
-        className="addform-store"
-        value={store}
-        onChange={(e) => setStore(e.target.value)}
-        placeholder="店名（任意・例: ユニオン豊見城店）"
-        aria-label="店名"
-      />
-
       <input
         ref={fileRef}
         type="file"
@@ -118,8 +103,11 @@ export function Camera({ today, onCaptured }: Props) {
         onClick={() => fileRef.current?.click()}
         disabled={phase === "working"}
       >
-        {phase === "working" ? "解析中…" : "📷 チラシを撮る / 選ぶ"}
+        {phase === "working" ? "解析中…" : "📷 チラシを撮る"}
       </button>
+      <p className="note" style={{ textAlign: "center" }}>
+        撮るだけで商品・価格・単価を自動で読み取り、今日のランキングに加えます。
+      </p>
 
       {phase === "working" && <p className="note">{status}</p>}
       {phase === "idle" && status && <p className="note">{status}</p>}
