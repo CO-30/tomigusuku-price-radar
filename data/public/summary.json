@@ -1,6 +1,6 @@
 {
- "date": "2026-11-19",
- "updated_at": "2026-11-19 09:52",
+ "date": "2026-11-20",
+ "updated_at": "2026-11-20 10:49",
  "stores_total": 16,
  "stores_ok": 0,
  "products_total": 0,
@@ -9,9 +9,9 @@
  "stores": [
   {
    "id": "bigexpress_tsukazan",
-   "name": "ザ・ビッグエクスプレス 津嘉山店",
+   "name": "ザ・ビッグエクスプレス 津嘉山(つかざん)店",
    "area": "南風原町",
-   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/thebig/tukazan/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -59,7 +59,7 @@
    "id": "aeonstyle_toyosaki",
    "name": "イオンスタイル 豊崎",
    "area": "豊見城市",
-   "flyer_url": "https://tokubai.co.jp/177953",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/aeon/toyosaki/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -99,7 +99,7 @@
    "id": "maxvalu_toyomi",
    "name": "マックスバリュ とよみ店",
    "area": "豊見城市",
-   "flyer_url": "https://tokubai.co.jp/13027",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/maxvalu/toyomi/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -107,7 +107,7 @@
    "id": "maxvalu_dakejin",
    "name": "マックスバリュ 武富店",
    "area": "豊見城市",
-   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/maxvalu/taketomi/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -115,7 +115,7 @@
    "id": "maxvalu_tomigusuku",
    "name": "マックスバリュ 豊見城店",
    "area": "豊見城市",
-   "flyer_url": "https://tokubai.co.jp/13024",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/maxvalu/tomishiro/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   },
@@ -131,7 +131,7 @@
    "id": "bigexpress_oroku",
    "name": "ザ・ビッグエクスプレス 小禄店",
    "area": "那覇市小禄",
-   "flyer_url": "https://tokubai.co.jp/prefectures/47/areas/1073/leaflet",
+   "flyer_url": "https://www.aeon-ryukyu.jp/store/thebig/oroku/#webpaper",
    "status": "no_flyer",
    "detail": "inboxに投入なし"
   }
